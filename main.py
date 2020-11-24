@@ -1,7 +1,4 @@
-import asyncio
-import json
-import aiohttp
-from understat import Understat
+import stats
 
 '''
 FUNCTIONS:
@@ -23,12 +20,7 @@ FUNCTIONS:
   - get_match_shots(match_id)
 '''
 
+if __name__ == '__main__':
+    stats.getLatestMatches()
 
-async def main():
-    async with aiohttp.ClientSession() as session:
-        understat = Understat(session)
-        fixtures = await understat.get_match_shots(15473)
-        print(json.dumps(fixtures, sort_keys=True, indent=4))
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
