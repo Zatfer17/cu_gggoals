@@ -1,3 +1,0 @@
-https://understat.readthedocs.io/en/latest/
-https://github.com/ping/instagram_private_api
-https://github.com/olalidmark/footballpitchplot

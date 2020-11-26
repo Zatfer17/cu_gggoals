@@ -7,21 +7,21 @@ from datetime import datetime, timedelta
 import plotly.express as px
 import numpy as np
 
-async def getLatestMatches_routine():
+async def getUpsetOfTheWeek():
+
+    print("UPSET OF THE WEEK FUNCTIONALITY")
+
     async with aiohttp.ClientSession() as session:
         understat = Understat(session)
         fixtures = await understat.get_league_results("serie_a", 2021)
-        print(fixtures)
 
         latestGameDate = datetime.strptime(fixtures[-1]['datetime'], "%Y-%m-%d %H:%M:%S")
         olderGameDate = latestGameDate - timedelta(3)
-        print(olderGameDate)
 
         toKeep = []
         for value in fixtures:
             if datetime.strptime(value['datetime'], "%Y-%m-%d %H:%M:%S") >= olderGameDate:
                 toKeep.append(value)
-        print(toKeep)
 
         index = 0
         maxUpset = 0
@@ -31,23 +31,18 @@ async def getLatestMatches_routine():
             actualResultDifference = float(toKeep[i]['goals']['h']) - float(toKeep[i]['goals']['a'])
             expectedResultDifference = float(toKeep[i]['xG']['h']) - float(toKeep[i]['xG']['a'])
             upset = abs(abs(actualResultDifference) - abs(expectedResultDifference))
-            print(upset)
             if np.sign(actualResultDifference) != np.sign(expectedResultDifference) and upset > maxUpset:
                 index = i
                 maxUpset = upset
                 id = toKeep[i]['id']
-        print(toKeep[index])
-        print(maxUpset)
-        print(id)
+
+        print("UPSET OF THE WEEK:")
+        print(json.dumps(toKeep[index], indent=4, sort_keys=True))
+        print()
 
         stats = await understat.get_match_shots(id)
-        print(len(stats['h']))
-        print(len(stats['a']))
-        print(stats)
         top10_h = sorted(stats['h'], key=lambda x: x['xG'], reverse=True)
         top10_a = sorted(stats['a'], key=lambda x: x['xG'], reverse=True)
-        print(len(top10_h))
-        print(top10_a)
 
         df_h = pd.DataFrame(top10_h)
         df_a = pd.DataFrame(top10_a)
@@ -62,6 +57,8 @@ async def getLatestMatches_routine():
         df_a.rename(columns={"a_team": "team"}, inplace=True)
 
         result = pd.concat([df_h, df_a])
+
+        print("OCCASIONS DATAFRAME")
         print(result)
 
         fig = px.scatter(result, x="X", y="Y", color="team", size="xG", width=1280, height=877)
@@ -85,11 +82,14 @@ async def getLatestMatches_routine():
         fig.update_yaxes(range=[0.0, 1.0])
 
         fig.show()
-        #fig.write_image("fig1.png")
+        home_team = toKeep[index]['h']['short_title']
+        away_team = toKeep[index]['a']['short_title']
+        date = toKeep[index]['datetime']
+        fig.write_image("graphs/" + home_team + "_" + away_team + "_" + date + ".png")
 
+        print()
+        print("RESULT STORED")
 
-
-
-def getLatestMatches():
+def routine(functionality):
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(getLatestMatches_routine())
+    loop.run_until_complete(functionality)

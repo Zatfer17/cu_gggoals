@@ -21,6 +21,6 @@ FUNCTIONS:
 '''
 
 if __name__ == '__main__':
-    stats.getLatestMatches()
+    stats.routine(stats.getUpsetOfTheWeek())
 
 
