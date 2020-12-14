@@ -16,7 +16,7 @@ async def getUpsetOfTheWeek():
         fixtures = await understat.get_league_results("serie_a", 2021)
 
         latestGameDate = datetime.strptime(fixtures[-1]['datetime'], "%Y-%m-%d %H:%M:%S")
-        olderGameDate = latestGameDate - timedelta(3)
+        olderGameDate = latestGameDate - timedelta(7)
 
         toKeep = []
         for value in fixtures:
@@ -57,6 +57,7 @@ async def getUpsetOfTheWeek():
         df_a.rename(columns={"a_team": "team"}, inplace=True)
 
         result = pd.concat([df_h, df_a])
+        result["xG"] = 2 * result["xG"]
 
         print("OCCASIONS DATAFRAME")
         print(result)
